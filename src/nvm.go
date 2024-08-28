@@ -148,30 +148,7 @@ func main() {
 			saveSettings()
 		}
 	case "current":
-		inuse, _ := node.GetCurrentVersion()
-		v, _ := semver.Make(inuse)
-		err := v.Validate()
-
-		if err != nil {
-			fmt.Println(inuse)
-		} else if inuse == "Unknown" {
-			fmt.Println("No current version. Run 'nvm use x.x.x' to set a version.")
-		} else {
-			fmt.Println("v" + inuse)
-		}
-	case "active":
-		inuse, _ := node.GetCurrentVersion()
-		v, _ := semver.Make(inuse)
-		err := v.Validate()
-
-		if err != nil {
-			fmt.Println(inuse)
-		} else if inuse == "Unknown" {
-			fmt.Println("No active version. Run 'nvm use x.x.x' to set a version.")
-		} else {
-			var activeVersion = fmt.Sprintf("%s\\v%d.%d.%d", env.root, v.Major, v.Minor, v.Patch)
-			fmt.Println("Active Version Path: " + activeVersion)
-		}
+		current()
 
 	//case "update": update()
 	case "node_mirror":
@@ -204,6 +181,31 @@ func isTerminal() bool {
 		return false
 	}
 	return (fileInfo.Mode() & os.ModeCharDevice) != 0
+}
+
+func current() {
+	args := os.Args
+	inuse, _ := node.GetCurrentVersion()
+	v, _ := semver.Make(inuse)
+	err := v.Validate()
+
+	if err != nil {
+		fmt.Println(inuse)
+	} else if inuse == "Unknown" {
+		fmt.Println("No current version. Run 'nvm use x.x.x' to set a version.")
+	} else {
+		if len(args) == 3 {
+			var activeVersion = fmt.Sprintf("%s\\v%d.%d.%d", env.root, v.Major, v.Minor, v.Patch)
+			if args[2] == "--path" {
+				fmt.Println("Active Version Path: " + activeVersion)
+			} else if args[2] == "--exe-path" {
+				activeVersion = activeVersion + "\\node.exe"
+				fmt.Println("Active Version Executable Path: " + activeVersion)
+			}
+		} else {
+			fmt.Println("v" + inuse)
+		}
+	}
 }
 
 // const (
@@ -1244,6 +1246,7 @@ func help() {
 	fmt.Println(" ")
 	fmt.Println("  nvm arch                     : Show if node is running in 32 or 64 bit mode.")
 	fmt.Println("  nvm current                  : Display active version.")
+	fmt.Println("      [--path | --exe-path]      If flags are present, will display the active node version path or executable path respectively.")
 	fmt.Println("  nvm debug                    : Check the NVM4W process for known problems (troubleshooter).")
 	fmt.Println("  nvm install <version> [arch] : The version can be a specific version, \"latest\" for the latest current version, or \"lts\" for the")
 	fmt.Println("                                 most recent LTS version. Optionally specify whether to install the 32 or 64 bit version (defaults")
