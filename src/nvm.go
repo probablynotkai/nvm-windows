@@ -159,6 +159,19 @@ func main() {
 		} else {
 			fmt.Println("v" + inuse)
 		}
+	case "active":
+		inuse, _ := node.GetCurrentVersion()
+		v, _ := semver.Make(inuse)
+		err := v.Validate()
+
+		if err != nil {
+			fmt.Println(inuse)
+		} else if inuse == "Unknown" {
+			fmt.Println("No active version. Run 'nvm use x.x.x' to set a version.")
+		} else {
+			var activeVersion = fmt.Sprintf("%s\\v%d.%d.%d", env.root, v.Major, v.Minor, v.Patch)
+			fmt.Println("Active Version Path: " + activeVersion)
+		}
 
 	//case "update": update()
 	case "node_mirror":
